@@ -14,8 +14,7 @@ load_dotenv()  # take environment variables from .env.
 async def root():
     return {"message": "NZBScoutCrawler"}
 
-caps = """
-    <?xml version="1.0" encoding="UTF-8"?>
+caps = """<?xml version="1.0" encoding="UTF-8"?>
   <caps>
     <!-- server information -->
     <server version="1.0" title="Newznab" strapline="A great usenet indexer"
