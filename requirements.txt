@@ -2,4 +2,5 @@ requests
 bs4
 html5lib
 numpy
+python-dotenv
 fastapi-caching
