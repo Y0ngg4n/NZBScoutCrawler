@@ -85,7 +85,7 @@ async def api(t: str, request: Request,  extended: int = 1, apikey: str = "", q:
     if os.getenv("API_KEY") and apikey != os.getenv("API_KEY"):
         raise HTTPException(status_code=403, detail="Wrong API Key")
 
-    xml = await Search.search(q, t, request.url)
+    xml = await Search.search(q, t, request)
 
     response = Response(content=xml, media_type="application/xml")
     await rcache.set(response, tag="api")

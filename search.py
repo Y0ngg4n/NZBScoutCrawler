@@ -20,10 +20,10 @@ movie_skips = 6
 class Search:
 
     @staticmethod
-    async def search(query, type, request_url):
+    async def search(query, type, request):
         # Search
         if query == "":
-            return Search.create_xml([], request_url)
+            return Search.create_xml([], request)
         page = 1
         urls = []
         request_type = "movies"
@@ -73,7 +73,7 @@ class Search:
             threads.append(thread)
         for thread in threads:
             thread.join()
-        return Search.create_xml(nzbs, request_url)
+        return Search.create_xml(nzbs, request)
 
     @staticmethod
     def get_movie(url, nzbs):
@@ -215,7 +215,7 @@ class Search:
         return description.parent.find(tag_name).text
 
     @staticmethod
-    def create_xml_base(url):
+    def create_xml_base(request):
         # https://newznab.readthedocs.io/en/latest/misc/api/?highlight=search#movie-search
         # Create <rss>
         rss = et.Element("rss")
@@ -233,16 +233,36 @@ class Search:
         return rss, channel
 
     @staticmethod
-    def create_xml(list, url):
-        rss, channel = Search.create_xml_base(url)
+    def create_xml(list, request):
+        rss, channel = Search.create_xml_base(request)
 
         newznab_response = et.SubElement(channel, "newznab:response")
         newznab_response.set("offset", '0')
         newznab_response.set("total", str(len(list)))
         atom_link = et.SubElement(channel, "atom:link")
-        atom_link.set("href", str(url))
+        atom_link.set("href", str(request.url))
         atom_link.set("rel", 'self')
         atom_link.set("type", 'application/rss+xml')
+        title = et.SubElement(channel, "title")
+        title.text = "NZBScoutCrawler"
+        description = et.SubElement(channel, "description")
+        description.text = "API Feed"
+        link = et.SubElement(channel, "link")
+        link.text = str(request.base_url)
+        language = et.SubElement(channel, "language")
+        language.text = "en-gb"
+        webMaster = et.SubElement(channel, "webMaster")
+        webMaster.text = "y0ngg4n@github.com (GitHub)"
+        category = et.SubElement(channel, "category")
+        image = et.SubElement(channel, "image")
+        image_url = et.SubElement(image, "url")
+        image_url.text = "https://nzbscout.com/images/logo.svg"
+        image_title = et.SubElement(image, "title")
+        image_title.text = "NZBScout"
+        image_link = et.SubElement(image, "link")
+        image_link.text = "https://nzbscout.com/"
+        image_description = et.SubElement(image, "description")
+        image_description.text = "NZBScout"
 
         for item in list:
             print("Film: " + item.title)
