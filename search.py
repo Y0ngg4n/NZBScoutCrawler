@@ -15,6 +15,7 @@ import numpy as np
 
 base_url = "https://nzbscout.com"
 movie_skips = 6
+empty_url_skips = 6
 
 
 class Search:
@@ -23,7 +24,24 @@ class Search:
     async def search(query, type, request):
         # Search
         if query == "":
-            return Search.create_xml([], request)
+            empty_urls = []
+            response = requests.get(base_url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            empyt_nzbs = []
+            empty_threads = []
+            for link in soup.find_all('a'):
+                href = link.get('href')
+                regex = r'\/movies\/'
+                if re.search(regex, href):
+                    empty_urls.append(href)
+            empty_urls = empty_urls[empty_url_skips:]
+            for i in range(6):
+                thread = Thread(target=Search.get_movie, args=(empty_urls[i], empyt_nzbs))
+                thread.start()
+                empty_threads.append(thread)
+            for thread in empty_threads:
+                thread.join()
+            return Search.create_xml(empyt_nzbs, request)
         page = 1
         urls = []
         request_type = "movies"
