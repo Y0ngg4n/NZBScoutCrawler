@@ -70,9 +70,7 @@ caps = """<?xml version="1.0" encoding="UTF-8"?>
             <subcat id="5045" name="UHD"/>
         </category>
     </categories>
-  </caps>
-</xml>
-"""
+  </caps>"""
 
 @app.get("/api/")
 async def api(t: str, apikey: str, q: str, rcache: ResponseCache = cache_manager.from_request()):
