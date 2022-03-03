@@ -14,10 +14,7 @@ load_dotenv()  # take environment variables from .env.
 async def root():
     return {"message": "NZBScoutCrawler"}
 
-
-@app.get("/caps")
-async def root():
-    caps = """
+caps = """
     <?xml version="1.0" encoding="UTF-8"?>
   <caps>
     <!-- server information -->
@@ -76,15 +73,17 @@ async def root():
     </categories>
   </caps>
 </xml>
-    """
-    response = Response(content=caps, media_type="application/xml")
-    return response
+"""
 
 @app.get("/api/")
 async def api(t: str, apikey: str, q: str, rcache: ResponseCache = cache_manager.from_request()):
     if rcache.exists():
         print("Cache hit!")
         return rcache.data
+
+    if t == "caps":
+        return Response(content=caps, media_type="application/xml")
+
     print(os.getenv("API_KEY"))
     if apikey != os.getenv("API_KEY"):
         raise HTTPException(status_code=403, detail="Wrong API Key")
