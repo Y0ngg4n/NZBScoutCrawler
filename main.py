@@ -87,7 +87,7 @@ async def api(t: str, extended: int = 1, apikey: str = "", q: str = "", rcache: 
 
     xml = await Search.search(q, t)
 
-    response = Response(content=xml, media_type="application/xml")
+    response = Response(content='<?xml version="1.0" encoding="UTF-8"?>' + xml, media_type="application/xml")
     await rcache.set(response, tag="api")
     return response
 
