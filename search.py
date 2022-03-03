@@ -218,6 +218,8 @@ class Search:
     def create_xml_base():
         # https://newznab.readthedocs.io/en/latest/misc/api/?highlight=search#movie-search
         # Create <rss>
+        tree = et.ElementTree("tree")
+
         rss = et.Element("rss")
         rss.set('version', '2.0')
         channel = et.SubElement(rss, 'channel')
@@ -228,11 +230,11 @@ class Search:
         description = et.SubElement(channel, "description")
         description.text = "NZBScoutCrawler"
 
-        return rss, channel
+        return tree, rss, channel
 
     @staticmethod
     def create_xml(list):
-        rss, channel = Search.create_xml_base()
+        tree, rss, channel = Search.create_xml_base()
 
         newznab_response = et.SubElement(channel, "newznab:response")
         newznab_response.set("offset", '0')
@@ -267,6 +269,6 @@ class Search:
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
         f = BytesIO()
-        rss.write(f, encoding='utf-8', xml_declaration=True)
+        tree.write(f, encoding='utf-8', xml_declaration=True)
         return f.getvalue()
 
