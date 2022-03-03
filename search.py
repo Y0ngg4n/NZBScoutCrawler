@@ -219,7 +219,6 @@ class Search:
         # https://newznab.readthedocs.io/en/latest/misc/api/?highlight=search#movie-search
         # Create <rss>
         tree = et.ElementTree("tree")
-
         rss = et.Element("rss")
         rss.set('version', '2.0')
         channel = et.SubElement(rss, 'channel')
@@ -229,6 +228,7 @@ class Search:
 
         description = et.SubElement(channel, "description")
         description.text = "NZBScoutCrawler"
+        tree._setroot(rss)
 
         return tree, rss, channel
 
