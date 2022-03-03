@@ -61,9 +61,6 @@ class Search:
         threads = []
         counter = 0
         for url in urls:
-            # TODO: Remove
-            if counter > 3:
-                break
             counter += 1
             thread = Thread(target=nzb_method, args=(url, nzbs))
             thread.start()
