@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import requests
 import urllib.parse
 from bs4 import BeautifulSoup
@@ -264,6 +266,7 @@ class Search:
             enclosure.set("url", item.nzb_url)
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
-
-        return et.tostring(rss, xml_declaration=True, encoding='utf-8')
+        f = BytesIO()
+        rss.write(f, encoding='utf-8', xml_declaration=True)
+        return f.getvalue()
 
