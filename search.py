@@ -20,10 +20,10 @@ movie_skips = 6
 class Search:
 
     @staticmethod
-    async def search(query, type):
+    async def search(query, type, request_url):
         # Search
         if query == "":
-            return Search.create_xml([])
+            return Search.create_xml([], request_url)
         page = 1
         urls = []
         request_type = "movies"
@@ -73,7 +73,7 @@ class Search:
             threads.append(thread)
         for thread in threads:
             thread.join()
-        return Search.create_xml(nzbs)
+        return Search.create_xml(nzbs, request_url)
 
     @staticmethod
     def get_movie(url, nzbs):
@@ -215,7 +215,7 @@ class Search:
         return description.parent.find(tag_name).text
 
     @staticmethod
-    def create_xml_base():
+    def create_xml_base(url):
         # https://newznab.readthedocs.io/en/latest/misc/api/?highlight=search#movie-search
         # Create <rss>
         rss = et.Element("rss")
@@ -233,12 +233,16 @@ class Search:
         return rss, channel
 
     @staticmethod
-    def create_xml(list):
-        rss, channel = Search.create_xml_base()
+    def create_xml(list, url):
+        rss, channel = Search.create_xml_base(url)
 
         newznab_response = et.SubElement(channel, "newznab:response")
         newznab_response.set("offset", '0')
         newznab_response.set("total", str(len(list)))
+        atom_link = et.SubElement(channel, "atom:link")
+        atom_link.set("href", str(url))
+        atom_link.set("rel", 'self')
+        atom_link.set("type", 'application/rss+xml')
 
         for item in list:
             print("Film: " + item.title)
