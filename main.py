@@ -73,7 +73,7 @@ caps = """<?xml version="1.0" encoding="UTF-8"?>
   </caps>"""
 
 @app.get("/api/")
-async def api(t: str, extended: int, apikey: str = "", q: str = "", rcache: ResponseCache = cache_manager.from_request()):
+async def api(t: str, extended: int = 1, apikey: str = "", q: str = "", rcache: ResponseCache = cache_manager.from_request()):
     if rcache.exists():
         print("Cache hit!")
         return rcache.data
