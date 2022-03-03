@@ -266,5 +266,7 @@ class Search:
             enclosure.set("url", item.nzb_url)
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
-        return et.tostring(rss, encoding='utf8', method='xml')
-
+        xdec = """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>"""
+        xml = et.tostring(rss, encoding="utf-8").decode('utf-8')
+        xml = xdec + xml
+        return xml.encode('utf-8')
