@@ -20,6 +20,8 @@ class Search:
     @staticmethod
     async def search(query, type):
         # Search
+        if query == "":
+            return Search.create_xml([])
         page = 1
         urls = []
         request_type = "movies"
@@ -48,9 +50,12 @@ class Search:
 
             for link in soup.find_all('a'):
                 href = link.get('href')
-                regex = r'\/' + request_type + r'\/'
-                if re.search(regex, href):
+                if type == "search":
                     page_urls.append(href)
+                else:
+                    regex = r'\/' + request_type + r'\/'
+                    if re.search(regex, href):
+                        page_urls.append(href)
             # Check empty search result
             page_urls = page_urls[movie_skips:]
             print(page_urls)
