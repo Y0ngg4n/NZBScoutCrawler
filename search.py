@@ -59,9 +59,7 @@ class Search:
             page += 1
         nzbs = []
         threads = []
-        counter = 0
         for url in urls:
-            counter += 1
             thread = Thread(target=nzb_method, args=(url, nzbs))
             thread.start()
             threads.append(thread)
