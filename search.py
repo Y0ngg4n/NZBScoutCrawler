@@ -112,7 +112,8 @@ class Search:
                               length=len(requests.get(base_url + nzb_url).content),
                               language=Search.find_language(soup),
                               posted=Search.find_posted(soup),
-                              category="Movie > " + Search.find_category(soup)
+                              category="Movie > " + Search.find_category(soup),
+                              newznab_category1="2000"
                               )
                         )
         except Exception as e:
@@ -138,7 +139,8 @@ class Search:
                            length=len(requests.get(base_url + nzb_url).content),
                            language=Search.find_language(soup),
                            posted=Search.find_posted(soup),
-                           category="TV > " + Search.find_category(soup)
+                           category="TV > " + Search.find_category(soup),
+                           newznab_category1="5000"
                            )
                         )
         except Exception as e:
@@ -164,34 +166,9 @@ class Search:
                               length=len(requests.get(base_url + nzb_url).content),
                               language=Search.find_language(soup),
                               posted=Search.find_posted(soup),
-                              category="TV > " + Search.find_category(soup)
+                              category="TV > " + Search.find_category(soup),
+                              newznab_category1="2000"
                               )
-                        )
-        except Exception as e:
-            print(e)
-            pass
-
-    @staticmethod
-    def get_music(url, nzbs):
-        try:
-            print(base_url + url)
-            response = requests.get(base_url + url)
-            soup = BeautifulSoup(response.text, 'html5lib')
-            nzb_url = soup.select_one(
-                'a.btn.btn-outline-light.align-items-center.justify-content-center.btn-dwn.w-lg-220rem.h-52rem.ml-5').get(
-                'href')
-            title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
-            description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
-            print("Got NZB!")
-            nzbs.append(TV(url=base_url + url,
-                           nzb_url=nzb_url,
-                           title=title,
-                           description=description,
-                           length=len(requests.get(base_url + nzb_url).content),
-                           language=Search.find_language(soup),
-                           posted=Search.find_posted(soup),
-                           category="Music > " + Search.find_category(soup)
-                           )
                         )
         except Exception as e:
             print(e)
@@ -306,6 +283,12 @@ class Search:
             if item.category:
                 category = et.SubElement(xmlitem, "category")
                 category.text = item.category
+            newznab_category1 = et.SubElement(xmlitem, "newznab:attr")
+            newznab_category1.set('name', "category")
+            newznab_category1.set('value', item.newznab_category1)
+            newznab_size = et.SubElement(xmlitem, "newznab:attr")
+            newznab_size.set('name', "size")
+            newznab_size.set('value', str(item.length))
             enclosure = et.SubElement(xmlitem, "enclosure")
             enclosure.set("url", item.nzb_url)
             enclosure.set("type", "application/x-nzb")
