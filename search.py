@@ -40,7 +40,8 @@ class Search:
 
         old_page_urls = []
         page_urls = []
-        while (len(page_urls) == 0 or len(old_page_urls) == 0) or ((len(page_urls) > 0 or len(old_page_urls) > 0) and np.array_equal(old_page_urls, page_urls)):
+        while (len(page_urls) == 0 or len(old_page_urls) == 0) or (
+                (len(page_urls) > 0 or len(old_page_urls) > 0) and np.array_equal(old_page_urls, page_urls)):
             print("Checking page " + str(page))
             old_page_urls = page_urls.copy()
             urls += page_urls
@@ -111,14 +112,14 @@ class Search:
             description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
             print("Got NZB!")
             nzbs.append(TV(url=base_url + url,
-                              nzb_url=nzb_url,
-                              title=title,
-                              description=description,
-                              length=len(requests.get(base_url + nzb_url).content),
-                              language=Search.find_language(soup),
-                              posted=Search.find_posted(soup),
-                              category="TV > " + Search.find_category(soup)
-                              )
+                           nzb_url=nzb_url,
+                           title=title,
+                           description=description,
+                           length=len(requests.get(base_url + nzb_url).content),
+                           language=Search.find_language(soup),
+                           posted=Search.find_posted(soup),
+                           category="TV > " + Search.find_category(soup)
+                           )
                         )
         except Exception as e:
             print(e)
@@ -264,4 +265,5 @@ class Search:
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
 
-        return et.tostring(rss, xml_declaration=True)
+        return et.tostring(rss, xml_declaration=True, encoding='utf-8')
+
