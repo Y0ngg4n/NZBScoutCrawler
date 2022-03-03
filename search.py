@@ -290,7 +290,7 @@ class Search:
             newznab_size.set('name', "size")
             newznab_size.set('value', str(item.length))
             enclosure = et.SubElement(xmlitem, "enclosure")
-            enclosure.set("url", item.nzb_url)
+            enclosure.set("url", base_url + item.nzb_url)
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
         xdec = """<?xml version="1.0" encoding="UTF-8"?>"""
