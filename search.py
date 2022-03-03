@@ -264,4 +264,4 @@ class Search:
             enclosure.set("type", "application/x-nzb")
             enclosure.set("length", str(item.length))
 
-        return et.tostring(rss)
+        return et.tostring(rss, xml_declaration=True)
