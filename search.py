@@ -220,6 +220,8 @@ class Search:
         # Create <rss>
         rss = et.Element("rss")
         rss.set('version', '2.0')
+        rss.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
+        rss.set('xmlns:newznab', 'http://www.newznab.com/DTD/2010/feeds/attributes/')
         channel = et.SubElement(rss, 'channel')
 
         title = et.SubElement(channel, "title")
