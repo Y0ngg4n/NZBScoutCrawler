@@ -113,7 +113,8 @@ class Search:
                               language=Search.find_language(soup),
                               posted=Search.find_posted(soup),
                               category="Movie > " + Search.find_category(soup),
-                              newznab_category1="2000"
+                              newznab_category1="2000",
+                              file_size=Search.find_file_size(soup)
                               )
                         )
         except Exception as e:
@@ -140,7 +141,8 @@ class Search:
                            language=Search.find_language(soup),
                            posted=Search.find_posted(soup),
                            category="TV > " + Search.find_category(soup),
-                           newznab_category1="5000"
+                           newznab_category1="5000",
+                           file_size=Search.find_file_size(soup)
                            )
                         )
         except Exception as e:
@@ -167,7 +169,8 @@ class Search:
                               language=Search.find_language(soup),
                               posted=Search.find_posted(soup),
                               category="TV > " + Search.find_category(soup),
-                              newznab_category1="2000"
+                              newznab_category1="2000",
+                              file_size=Search.find_file_size(soup)
                               )
                         )
         except Exception as e:
@@ -199,6 +202,25 @@ class Search:
             category = parent.findChildren()[4]
             return category.findChildren()[0].text
         except:
+            return None
+
+    @staticmethod
+    def find_file_size(soup):
+        try:
+            description = Search.find_by_text(soup, 'th', "Size")
+            size = Search.find_children_text(description, 'td')
+            f = float(size[:3])
+            print(f)
+            factor = 1
+            if "GB" in size:
+                factor = 1073741824
+            elif "MB" in size:
+                factor = 1048576
+            elif "KB" in size:
+                factor = 1024
+            return str(int(f * factor))
+        except Exception as e:
+            print(e)
             return None
 
     @staticmethod
@@ -286,9 +308,10 @@ class Search:
             newznab_category1 = et.SubElement(xmlitem, "newznab:attr")
             newznab_category1.set('name', "category")
             newznab_category1.set('value', item.newznab_category1)
-            newznab_size = et.SubElement(xmlitem, "newznab:attr")
-            newznab_size.set('name', "size")
-            newznab_size.set('value', str(item.length))
+            if(item.file_size):
+                newznab_size = et.SubElement(xmlitem, "newznab:attr")
+                newznab_size.set('name', "size")
+                newznab_size.set('value', item.file_size)
             enclosure = et.SubElement(xmlitem, "enclosure")
             enclosure.set("url", base_url + item.nzb_url)
             enclosure.set("type", "application/x-nzb")
