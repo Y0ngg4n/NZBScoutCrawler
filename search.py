@@ -121,6 +121,8 @@ class Search:
             return "audio"
         elif type == "book":
             return "books"
+        else:
+            return "movies"
 
     @staticmethod
     def get_category(type):
@@ -132,6 +134,8 @@ class Search:
             return "Music > "
         elif type == "book":
             return "Book > "
+        else:
+            return "Movie > "
 
     @staticmethod
     def get_newznab_category(type):
@@ -143,6 +147,8 @@ class Search:
             return "3000"
         elif type == "book":
             return "7000"
+        else:
+            return "2000"
 
     @staticmethod
     def find_description(soup):
