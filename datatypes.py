@@ -46,9 +46,9 @@ caps = """<?xml version="1.0" encoding="UTF-8"?>
          Other search functions are optional.
     -->
     <searching>
-        <search available="yes"/>
-        <tv-search available="yes"/>
-        <movie-search available="yes"/>
+        <search available="yes" supportedParams="q"/>
+        <tv-search available="yes" supportedParams="q,season,ep"/>
+        <movie-search available="yes" supportedParams="q"/>
     </searching>
 
     <!-- supported categories -->

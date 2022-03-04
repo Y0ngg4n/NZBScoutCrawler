@@ -17,11 +17,11 @@ import numpy as np
 
 base_url = "https://nzbscout.com"
 
+
 class Search:
 
     @staticmethod
-    async def search(query, type, request):
-
+    async def search(query, type, request, ep, season):
         request_type = Search.get_request_type(type)
         regex = r'\/' + request_type + r'\/'
         print(request_type)
@@ -55,7 +55,28 @@ class Search:
             old_page_urls = page_urls.copy()
             urls += page_urls
             page_urls = []
-            response = requests.get(base_url + "/search?q=" + query + "&page=" + str(page))
+            nzbscout_search_url = base_url + "/search?q=" + query + "&page=" + str(page)
+            if type == "tv search" or type == "tvsearch":
+                print("Searching for x Notation")
+                nzbscout_search_url = base_url + "/search?q=" + query + "+" + ep + "x" + season + "&page=" + str(page)
+                print(nzbscout_search_url)
+                response = requests.get(nzbscout_search_url)
+                soup = BeautifulSoup(response.text, 'html.parser')
+
+                for link in soup.find_all('a'):
+                    href = link.get('href')
+                    if type == "search":
+                        page_urls.append(href)
+                    else:
+                        if re.search(regex, href):
+                            page_urls.append(href)
+                print("Searching for EP S Notation")
+                ep = str(ep) if len(ep) > 1 else "0" + str(ep)
+                season = str(season) if len(season) > 1 else "0" + str(season)
+                nzbscout_search_url = base_url + "/search?q=" + query + "+E" + ep + "S" + season + "&page=" + str(page)
+                print(nzbscout_search_url)
+            print(page_urls)
+            response = requests.get(nzbscout_search_url)
             soup = BeautifulSoup(response.text, 'html.parser')
 
             for link in soup.find_all('a'):
@@ -115,7 +136,7 @@ class Search:
     def get_request_type(type):
         if type == "movie":
             return "movies"
-        elif type == "tv search":
+        elif type == "tv search" or type == "tvsearch":
             return "tv"
         elif type == "music":
             return "audio"
@@ -128,7 +149,7 @@ class Search:
     def get_category(type):
         if type == "movie":
             return "Movie > "
-        elif type == "tv search":
+        elif type == "tv search" or type == "tvsearch":
             return "TV > "
         elif type == "music":
             return "Music > "
@@ -141,7 +162,7 @@ class Search:
     def get_newznab_category(type):
         if type == "movie":
             return "2000"
-        elif type == "tv search":
+        elif type == "tv search" or type == "tvsearch":
             return "5000"
         elif type == "music":
             return "3000"
