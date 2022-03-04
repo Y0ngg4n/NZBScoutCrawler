@@ -1,4 +1,4 @@
-#NZBScout Crawler
+# NZBScout Crawler
 This is a crawler for the popular Website https://nzbscout.com.
 I have built it mainly for integration with Radarr.
 
