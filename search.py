@@ -10,7 +10,7 @@ import asyncio
 from threading import Thread
 from datetime import datetime, timezone
 from email.utils import format_datetime
-from datatypes import Movie, TV, Music
+from datatypes import Item
 import numpy as np
 
 base_url = "https://nzbscout.com"
@@ -36,7 +36,7 @@ class Search:
                     empty_urls.append(href)
             empty_urls = empty_urls[empty_url_skips:]
             for i in range(6):
-                thread = Thread(target=Search.get_movie, args=(empty_urls[i], empyt_nzbs))
+                thread = Thread(target=Search.get_item, args=(empty_urls[i], empyt_nzbs))
                 thread.start()
                 empty_threads.append(thread)
             for thread in empty_threads:
@@ -45,16 +45,13 @@ class Search:
         page = 1
         urls = []
         request_type = "movies"
-        nzb_method = Search.get_movie
+        nzb_method = Search.get_item
         if type == "movie":
             request_type = "movies"
-            nzb_method = Search.get_movie
         elif type == "tv search":
             request_type = "tv"
-            nzb_method = Search.get_tv
         elif type == "music":
             request_type = "audio"
-            nzb_method = Search.get_audio
         elif type == "book":
             request_type = "books"
 
@@ -94,7 +91,7 @@ class Search:
         return Search.create_xml(nzbs, request)
 
     @staticmethod
-    def get_movie(url, nzbs):
+    def get_item(url, nzbs):
         try:
             print(base_url + url)
             response = requests.get(base_url + url)
@@ -105,73 +102,19 @@ class Search:
             title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
             description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
             print("Got NZB!")
-            nzbs.append(Movie(url=base_url + url,
-                              nzb_url=nzb_url,
-                              title=title,
-                              description=description,
-                              length=len(requests.get(base_url + nzb_url).content),
-                              language=Search.find_language(soup),
-                              posted=Search.find_posted(soup),
-                              category="Movie > " + Search.find_category(soup),
-                              newznab_category1="2000",
-                              file_size=Search.find_file_size(soup)
-                              )
-                        )
-        except Exception as e:
-            print(e)
-            pass
-
-    @staticmethod
-    def get_tv(url, nzbs):
-        try:
-            print(base_url + url)
-            response = requests.get(base_url + url)
-            soup = BeautifulSoup(response.text, 'html5lib')
-            nzb_url = soup.select_one(
-                'a.btn.btn-outline-light.align-items-center.justify-content-center.btn-dwn.w-lg-220rem.h-52rem.ml-5').get(
-                'href')
-            title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
-            description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
-            print("Got NZB!")
-            nzbs.append(TV(url=base_url + url,
-                           nzb_url=nzb_url,
-                           title=title,
-                           description=description,
-                           length=len(requests.get(base_url + nzb_url).content),
-                           language=Search.find_language(soup),
-                           posted=Search.find_posted(soup),
-                           category="TV > " + Search.find_category(soup),
-                           newznab_category1="5000",
-                           file_size=Search.find_file_size(soup)
-                           )
-                        )
-        except Exception as e:
-            print(e)
-            pass
-
-    @staticmethod
-    def get_music(url, nzbs):
-        try:
-            print(base_url + url)
-            response = requests.get(base_url + url)
-            soup = BeautifulSoup(response.text, 'html5lib')
-            nzb_url = soup.select_one(
-                'a.btn.btn-outline-light.align-items-center.justify-content-center.btn-dwn.w-lg-220rem.h-52rem.ml-5').get(
-                'href')
-            title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
-            description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
-            print("Got NZB!")
-            nzbs.append(Music(url=base_url + url,
-                              nzb_url=nzb_url,
-                              title=title,
-                              description=description,
-                              length=len(requests.get(base_url + nzb_url).content),
-                              language=Search.find_language(soup),
-                              posted=Search.find_posted(soup),
-                              category="TV > " + Search.find_category(soup),
-                              newznab_category1="2000",
-                              file_size=Search.find_file_size(soup)
-                              )
+            nzbs.append(Item(url=base_url + url,
+                             nzb_url=nzb_url,
+                             title=title,
+                             description=description,
+                             length=len(requests.get(base_url + nzb_url).content),
+                             language=Search.find_language(soup),
+                             posted=Search.find_posted(soup),
+                             category="Movie > " + Search.find_category(soup),
+                             newznab_category1="2000",
+                             file_size=Search.find_file_size(soup),
+                             files=Search.find_files(soup),
+                             group=Search.find_group(soup)
+                             )
                         )
         except Exception as e:
             print(e)
@@ -210,7 +153,6 @@ class Search:
             description = Search.find_by_text(soup, 'th', "Size")
             size = Search.find_children_text(description, 'td')
             f = float(size[:3])
-            print(f)
             factor = 1
             if "GB" in size:
                 factor = 1073741824
@@ -220,7 +162,23 @@ class Search:
                 factor = 1024
             return str(int(f * factor))
         except Exception as e:
-            print(e)
+            return None
+
+    @staticmethod
+    def find_files(soup):
+        try:
+            description = Search.find_by_text(soup, 'th', "Files")
+            return Search.find_children_text(description, 'td')
+        except:
+            return None
+
+    @staticmethod
+    def find_group(soup):
+        try:
+            description = Search.find_by_text(soup, 'th', "Group")
+            td = description.parent.find('td')
+            return td.find('span').find('a').text
+        except:
             return None
 
     @staticmethod
@@ -308,10 +266,18 @@ class Search:
             newznab_category1 = et.SubElement(xmlitem, "newznab:attr")
             newznab_category1.set('name', "category")
             newznab_category1.set('value', item.newznab_category1)
-            if(item.file_size):
+            if (item.file_size):
                 newznab_size = et.SubElement(xmlitem, "newznab:attr")
                 newznab_size.set('name', "size")
                 newznab_size.set('value', item.file_size)
+            if (item.files):
+                newznab_size = et.SubElement(xmlitem, "newznab:attr")
+                newznab_size.set('name', "files")
+                newznab_size.set('value', item.files)
+            if (item.group):
+                newznab_size = et.SubElement(xmlitem, "newznab:attr")
+                newznab_size.set('name', "group")
+                newznab_size.set('value', item.group)
             enclosure = et.SubElement(xmlitem, "enclosure")
             enclosure.set("url", base_url + item.nzb_url)
             enclosure.set("type", "application/x-nzb")
