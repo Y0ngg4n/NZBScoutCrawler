@@ -93,7 +93,7 @@ class Search:
     @staticmethod
     def get_item(url, nzbs):
         try:
-            print(base_url + url)
+            print("Processing: " + base_url + url)
             response = requests.get(base_url + url)
             soup = BeautifulSoup(response.text, 'html5lib')
             nzb_url = soup.select_one(
@@ -101,7 +101,6 @@ class Search:
                 'href')
             title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
             description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
-            print("Got NZB!")
             nzbs.append(Item(url=base_url + url,
                              nzb_url=nzb_url,
                              title=title,
@@ -240,7 +239,7 @@ class Search:
         image_description.text = "NZBScout"
 
         for item in list:
-            print("Film: " + item.title)
+            print("Item: " + item.title)
             xmlitem = et.SubElement(channel, "item")
             if item.title:
                 title = et.SubElement(xmlitem, "title")
