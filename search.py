@@ -10,20 +10,23 @@ import asyncio
 from threading import Thread
 from datetime import datetime, timezone
 from email.utils import format_datetime
+
+import datatypes
 from datatypes import Item
 import numpy as np
 
 base_url = "https://nzbscout.com"
-movie_skips = 6
-empty_url_skips = 6
-
 
 class Search:
 
     @staticmethod
     async def search(query, type, request):
-        # Search
+
+        request_type = Search.get_request_type(type)
+        regex = r'\/' + request_type + r'\/'
+        print(request_type)
         if query == "":
+            print("Query is empty!")
             empty_urls = []
             response = requests.get(base_url)
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -31,12 +34,11 @@ class Search:
             empty_threads = []
             for link in soup.find_all('a'):
                 href = link.get('href')
-                regex = r'\/movies\/'
                 if re.search(regex, href):
                     empty_urls.append(href)
-            empty_urls = empty_urls[empty_url_skips:]
+            empty_urls = [i for i in empty_urls if i not in datatypes.remove_urls]
             for i in range(6):
-                thread = Thread(target=Search.get_item, args=(empty_urls[i], empyt_nzbs))
+                thread = Thread(target=Search.get_item, args=(empty_urls[i], empyt_nzbs, type))
                 thread.start()
                 empty_threads.append(thread)
             for thread in empty_threads:
@@ -44,16 +46,6 @@ class Search:
             return Search.create_xml(empyt_nzbs, request)
         page = 1
         urls = []
-        request_type = "movies"
-        nzb_method = Search.get_item
-        if type == "movie":
-            request_type = "movies"
-        elif type == "tv search":
-            request_type = "tv"
-        elif type == "music":
-            request_type = "audio"
-        elif type == "book":
-            request_type = "books"
 
         old_page_urls = []
         page_urls = []
@@ -71,11 +63,11 @@ class Search:
                 if type == "search":
                     page_urls.append(href)
                 else:
-                    regex = r'\/' + request_type + r'\/'
                     if re.search(regex, href):
                         page_urls.append(href)
+
             # Check empty search result
-            page_urls = page_urls[movie_skips:]
+            page_urls = [i for i in page_urls if i not in datatypes.remove_urls]
             print(page_urls)
             if len(page_urls) == 0:
                 break
@@ -83,7 +75,7 @@ class Search:
         nzbs = []
         threads = []
         for url in urls:
-            thread = Thread(target=nzb_method, args=(url, nzbs))
+            thread = Thread(target=Search.get_item, args=(url, nzbs, type))
             thread.start()
             threads.append(thread)
         for thread in threads:
@@ -91,16 +83,16 @@ class Search:
         return Search.create_xml(nzbs, request)
 
     @staticmethod
-    def get_item(url, nzbs):
+    def get_item(url, nzbs, request_type):
         try:
             print("Processing: " + base_url + url)
             response = requests.get(base_url + url)
             soup = BeautifulSoup(response.text, 'html5lib')
             nzb_url = soup.select_one(
-                'a.btn.btn-outline-light.align-items-center.justify-content-center.btn-dwn.w-lg-220rem.h-52rem.ml-5').get(
+                'a.btn.btn-outline-light.align-items-center').get(
                 'href')
             title = soup.select_one('h6.font-size-36.text-white.mb-4.pb-1').text
-            description = soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
+            description = Search.find_description(soup)
             nzbs.append(Item(url=base_url + url,
                              nzb_url=nzb_url,
                              title=title,
@@ -108,8 +100,8 @@ class Search:
                              length=len(requests.get(base_url + nzb_url).content),
                              language=Search.find_language(soup),
                              posted=Search.find_posted(soup),
-                             category="Movie > " + Search.find_category(soup),
-                             newznab_category1="2000",
+                             category=Search.get_category(request_type) + Search.find_category(soup),
+                             newznab_category1=Search.get_newznab_category(request_type),
                              file_size=Search.find_file_size(soup),
                              files=Search.find_files(soup),
                              group=Search.find_group(soup)
@@ -118,6 +110,46 @@ class Search:
         except Exception as e:
             print(e)
             pass
+
+    @staticmethod
+    def get_request_type(type):
+        if type == "movie":
+            return "movies"
+        elif type == "tv search":
+            return "tv"
+        elif type == "music":
+            return "audio"
+        elif type == "book":
+            return "books"
+
+    @staticmethod
+    def get_category(type):
+        if type == "movie":
+            return "Movie > "
+        elif type == "tv search":
+            return "TV > "
+        elif type == "music":
+            return "Music > "
+        elif type == "book":
+            return "Book > "
+
+    @staticmethod
+    def get_newznab_category(type):
+        if type == "movie":
+            return "2000"
+        elif type == "tv search":
+            return "5000"
+        elif type == "music":
+            return "3000"
+        elif type == "book":
+            return "7000"
+
+    @staticmethod
+    def find_description(soup):
+        try:
+            return soup.select_one('p.text-gray-5500.font-size-16.mb-5.pb-1.text-lh-md').text
+        except:
+            return None
 
     @staticmethod
     def find_language(soup):
