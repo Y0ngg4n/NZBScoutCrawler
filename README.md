@@ -7,7 +7,7 @@ Sometimes it won´t work for some items because it's reliability depends on the 
 
 It uses multiple threads to download the NZBs concurrently. 
 But because of the crawling and downloading it is much slower than already indexed sites.
-It searches all Pages. And I can't guarantee that you don't get blocked from NZBScout.
+It searches all Pages and uses in memory caching. And I can't guarantee that you don't get blocked from NZBScout.
 Currently, it seems to work fine for me. If i see that there will be blocking I will attempt to code workarounds for it.
 
 
